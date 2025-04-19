@@ -144,7 +144,7 @@
     const cont = document.getElementById('container');
 
     let examples = {};
-    fetch('public/examples.json')
+    fetch('/examples.json')
       .then(res => res.json())
       .then(data => {
         examples = data;
