@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>글자 쓰기 연습지</title>
+ <style>
+    @font-face {
+      font-family: 'HakgyoansimBadasseugi';
+      src: url('/fonts/HakgyoansimBadasseugi.ttf') format('truetype');
+    }
+
+    @page { size: A4 portrait; margin: 1cm; }
+    @media print {
+      #controls { display: none; }
+      body { -webkit-print-color-adjust: exact; }
+    }
+    body {
+      margin: 0; padding: 20px;
+      font-family: 'Nanum Gothic', sans-serif;
+    }
+    #controls {
+      margin-bottom: 16px;
+      background: #f9f9f9;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+    #controls label {
+      margin-right: 12px;
+      font-size: 16px;
+      display: inline-block;
+      margin-bottom: 6px;
+    }
+    #controls input,
+    #controls select,
+    #controls button {
+      padding: 4px;
+      font-size: 16px;
+    }
+    #controls button {
+      margin-left: 8px;
+    }
+    .block {
+      display: grid;
+      gap: 0;
+      margin-bottom: 12px;
+    }
+    .cell {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 40px;
+      height: 40px;
+      border: 1px solid #000;
+      font-size: 24px;
+      overflow: hidden;
+      position: relative;
+      box-sizing: border-box;
+    }
+    .cell::before {
+      content: ""; position: absolute;
+      top: 50%; left: 0; width: 100%; height: 0;
+      border-top: 1px dashed #000;
+      transform: translateY(-0.5px);
+    }
+    .cell::after {
+      content: ""; position: absolute;
+      top: 0; left: 50%; width: 0; height: 100%;
+      border-left: 1px dashed #000;
+      transform: translateX(-0.5px);
+    }
+    .guide {
+      color: #000;
+    }
+    .ghost {
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <div style="margin-bottom:8px;">
+      <label>연습할 글자:
+        <input id="inputText" type="text" placeholder="직접 입력할 글자..." style="width:300px;" />
+      </label>
+      <button id="reset">초기화</button>
+      <label style="margin-left:24px;">예문 선택:
+        <select id="exampleSelect"><option value="">-- 예문 선택 --</option></select>
+      </label>
+    </div>
+    <div>
+      <label>폰트:
+        <select id="fontSelect">
+          <option value="HakgyoansimBadasseugi">학교안심 받아쓰기체</option>
+          <option value="Nanum Gothic">나눔고딕</option>
+          <option value="Nanum Myeongjo">나눔명조</option>
+          <option value="Nanum Pen Script">나눔펜 스크립트</option>
+          <option value="Noto Sans KR">Noto Sans KR</option>
+          <option value="Noto Serif KR">Noto Serif KR</option>
+          <option value="Roboto">Roboto</option>
+        </select>
+      </label>
+      <label style="margin-left:24px;">학년:
+        <select id="gradeSelect">
+          <option value="1">1학년</option>
+          <option value="2">2학년</option>
+          <option value="3">3학년</option>
+          <option value="4">4학년</option>
+          <option value="5">5학년</option>
+          <option value="6">6학년</option>
+        </select>
+      </label>
+      <label style="margin-left:24px;">크기(pt):
+        <input id="sizeInput" type="number" value="40" min="12" max="72" />
+      </label>
+      <label style="margin-left:24px;">연습줄 수:
+        <select id="blankCount">
+          <option value="0">0줄</option>
+          <option value="1">1줄</option>
+          <option value="2" selected>2줄</option>
+          <option value="3">3줄</option>
+          <option value="4">4줄</option>
+        </select>
+      </label>
+      <label style="margin-left:24px;">
+        <input type="checkbox" id="showGhost"> 따라쓰기 추가
+      </label>
+      <button id="generate">생성</button>
+      <button id="print">인쇄</button>
+    </div>
+  </div>
+  <div id="container"></div>
+
+  <script>
+    const input = document.getElementById('inputText');
+    const fontSel = document.getElementById('fontSelect');
+    const gradeSel = document.getElementById('gradeSelect');
+    const sizeIn = document.getElementById('sizeInput');
+    const blankSel = document.getElementById('blankCount');
+    const ghostChk = document.getElementById('showGhost');
+    const exampleSelect = document.getElementById('exampleSelect');
+    const generateBtn = document.getElementById('generate');
+    const printBtn = document.getElementById('print');
+    const resetBtn = document.getElementById('reset');
+    const cont = document.getElementById('container');
+
+    let examples = {};
+    fetch('public/examples.json')
+      .then(res => res.json())
+      .then(data => {
+        examples = data;
+        Object.keys(data).forEach(title => {
+          const opt = document.createElement('option');
+          opt.value = title;
+          opt.textContent = title;
+          exampleSelect.appendChild(opt);
+        });
+      });
+
+    input.addEventListener('keypress', e => {
+      if (e.key === 'Enter') { e.preventDefault(); generateBtn.click(); }
+    });
+    const gradeSize = {1:40,2:38,3:36,4:34,5:32,6:30};
+    gradeSel.addEventListener('change', () => {
+      const g = parseInt(gradeSel.value,10);
+      if (gradeSize[g]) sizeIn.value = gradeSize[g];
+    });
+
+    generateBtn.addEventListener('click', () => {
+      const t = input.value || examples[exampleSelect.value] || '';
+      if (!t) return;
+      render(t);
+    });
+    resetBtn.addEventListener('click', () => { input.value=''; exampleSelect.value=''; cont.innerHTML=''; });
+    printBtn.addEventListener('click', () => window.print());
+
+function render(text) {
+  const font       = fontSel.value;
+  const size       = parseInt(sizeIn.value, 10);
+  const showGhost  = ghostChk.checked;
+  const baseBlank  = parseInt(blankSel.value, 10);
+
+  const cellSize  = Math.ceil(size * 1.6);
+  const pageWidth = 800;
+  const colCount  = Math.floor(pageWidth / cellSize);
+
+  const totalLetters = [' ', ...text.split('')];
+  const totalCells   = totalLetters.length;
+  const rowCount     = Math.ceil(totalCells / colCount);
+
+  const lines = [];
+  for (let i = 0; i < totalCells; i += colCount) {
+    lines.push(totalLetters.slice(i, i + colCount));
+  }
+
+  cont.innerHTML = '';
+
+  lines.forEach(chunk => {
+    const block = document.createElement('div');
+    block.className = 'block';
+
+    const actualBlank = showGhost ? baseBlank - 1 : baseBlank;
+    const totalRows = 1 + (showGhost ? 1 : 0) + actualBlank;
+
+    block.style.gridTemplateColumns = `repeat(${chunk.length}, ${cellSize}px)`;
+    block.style.gridTemplateRows    = `repeat(${totalRows}, ${cellSize}px)`;
+
+    // ① 가이드칸
+    chunk.forEach(ch => {
+      const cell = document.createElement('div');
+      cell.className = 'cell guide';
+      cell.style.width = cell.style.height = `${cellSize}px`;
+      cell.style.lineHeight = `${cellSize}px`;
+      cell.textContent = ch;
+      if (ch.trim()) {
+        cell.style.fontFamily = `'${font}', sans-serif`;
+        cell.style.fontSize   = `${size}px`;
+
+     	 if (/[.,]/.test(ch)) {
+      	  cell.style.justifyContent = 'flex-start';
+     	   cell.style.paddingLeft = '6px';
+	}
+      }
+      block.appendChild(cell);
+    });
+
+    // ② 따라쓰기칸 (있을 때만)
+    if (showGhost) {
+      chunk.forEach(ch => {
+        const cell = document.createElement('div');
+        cell.className = 'cell ghost';
+        cell.style.width = cell.style.height = `${cellSize}px`;
+        cell.style.lineHeight = `${cellSize}px`;
+        cell.textContent = ch;
+        if (ch.trim()) {
+          cell.style.fontFamily = `'${font}', sans-serif`;
+          cell.style.fontSize   = `${size}px`;
+
+   	   if (/[.,]/.test(ch)) {
+  	     cell.style.justifyContent = 'flex-start';
+   	     cell.style.paddingLeft = '6px';
+   	   }
+        }
+        block.appendChild(cell);
+      });
+    }
+
+    // ③ 빈 연습칸
+    for (let r = 0; r < actualBlank; r++) {
+      chunk.forEach(() => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.style.width = cell.style.height = `${cellSize}px`;
+        cell.style.lineHeight = `${cellSize}px`;
+        block.appendChild(cell);
+      });
+    }
+
+    cont.appendChild(block);
+  });
+}
+  </script>
+</body>
+</html>
