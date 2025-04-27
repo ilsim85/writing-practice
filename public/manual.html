@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>글씨 쓰기 연습장 설명서</title>
+  <style>
+    body { font-family: 'Nanum Gothic', sans-serif; padding: 20px; line-height: 1.6; }
+    h1, h2, h3 { color: #333; }
+    ul { margin-left: 20px; }
+    code { background: #f2f2f2; padding: 2px 4px; border-radius: 4px; }
+    .section { margin-bottom: 30px; }
+  </style>
+</head>
+<body>
+  <h1>글씨 쓰기 연습장 설명서</h1>
+
+  <div class="section">
+    <h2>소개</h2>
+    <p>이 연습장은 웹 기반으로 글씨 쓰기 연습지를 생성하고, 인쇄하거나 PDF로 저장할 수 있는 도구입니다.</p>
+  </div>
+
+  <div class="section">
+    <h2>핵심 기능</h2>
+    <ul>
+      <li><strong>직접 입력</strong>: 원하는 글자를 입력하여 연습지 생성(엔터로 생성 가능)</li>
+      <li><strong>짧은 글 랜덤</strong>: 미리 준비된 짧은 문장을 랜덤으로 추가(누를 수록 짧은 글 누적됨)</li>
+      <li><strong>긴 글 선택</strong>: 예문 목록에서 제목을 선택해 긴 글 불러오기</li>
+      <li><strong>이름 입력</strong>: 이름 입력하면 맨 위에 '날짜_이름' 생성</li>
+      <li><strong>글씨체 선택</strong>: 다양한 한글 폰트를 지원</li>
+      <li><strong>학년별 글자 크기</strong>: 1~6학년 기본 크기 제공</li>
+      <li><strong>글자 크기 조절</strong>: 12~72pt 사이로 화살표 사용하여 자유 변경 가능</li>
+      <li><strong>연습줄 수</strong>: 따라쓰기 칸과 빈 줄 수 설정</li>
+      <li><strong>인쇄 및 PDF 저장</strong>: 인쇄 미리보기 및 PDF 파일 저장</li>
+      <li><strong>설명서 열기</strong>: 메뉴의 "설명서" 버튼 클릭</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>사용 방법</h2>
+    <ol>
+      <li><strong>페이지 접속</strong>: 브라우저에서 사이트를 열고 컨트롤 패널을 확인합니다.</li>
+      <li><strong>글자 입력/선택</strong>: <code>연습할 글자</code>에 직접 입력하거나, <code>긴 글 선택</code> 드롭다운에서 예문을 선택합니다.</li>
+      <li><strong>이름 입력/선택</strong>: 이름을 입력하면 연습장 맨 우측에 날짜와 이름이 기록됩니다.</li>
+      <li><strong>설정 조정</strong>:
+        <ul>
+          <li><code>글씨체</code>: 원하는 폰트를 선택</li>
+          <li><code>학년</code>: 자동으로 적당한 글자 크기 적용</li>
+          <li><code>크기(pt)</code>: 필요에 따라 수동 조정</li>
+          <li><code>연습줄 수</code> 및 <code>따라쓰기 추가</code> 옵션 설정</li>
+          <li><code>세로/가로</code> 인쇄 방향 선택</li>
+        </ul>
+      </li>
+      <li><strong>미리보기</strong>: <code>만들기</code> 버튼 클릭 후 화면에 연습지가 표시됩니다.</li>
+      <li><strong>인쇄</strong>: <code>인쇄</code> 버튼을 누르면 인쇄 미리보기 후 출력</li>
+      <li><strong>PDF 저장</strong>: <code>PDF 저장</code> 클릭 시 자동 생성된 파일명(월일_이름.pdf)으로 다운로드/이름 미입력시(월일_연습장.pdf)</li>
+      <li><strong>설명서 보기</strong>: <code>설명서</code> 버튼 클릭 시 이 매뉴얼 페이지가 새 창으로 열립니다.</li>
+    </ol>
+  </div>
+
+  <div class="section">
+    <h2>설정 저장</h2>
+    <p>한 번 선택한 글씨체, 크기, 줄 수 등은 브라우저의 <code>localStorage</code>에 저장되어 다음 방문 시 자동 복원됩니다.</p>
+    <p>저장된 설정을 초기화하려면 브라우저 캐시 또는 로컬 스토리지를 삭제하세요.</p>
+  </div>
+
+  <div class="section">
+    <h2>자주 묻는 질문</h2>
+    <dl>
+      <dt>Q: 예문 목록이 나오지 않아요.</dt>
+      <dd>A: <code>examples.json</code>이 서버에서 200 OK로 로드되는지 확인하고, 브라우저 캐시를 비활성화한 후 새로고침하세요.</dd>
+      <dt>Q: 줄이 페이지에서 분할돼요.</dt>
+      <dd>A: CSS의 <code>page-break-inside: avoid</code>가 적용되어 있습니다. 인쇄 방향과 여백 설정을 확인하세요.</dd>
+    </dl>
+  </div>
+
+  <div class="section">
+    <h2>문의 및 기여</h2>
+    <p>ilsim85@gmail.com 으로 메일 보내주세요.</p>
+  </div>
+</body>
+</html>

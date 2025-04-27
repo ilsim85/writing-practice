@@ -2,262 +2,336 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>글자 쓰기 연습지</title>
- <style>
+  <title>글씨 쓰기 연습장</title>
+
+  <style>
+    /* 글씨체 로드: GangwonEduModu Light (L) */
+    @font-face {
+      font-family: 'GangwonEduModuL';
+      font-weight: 300;
+      font-style: normal;
+      font-display: swap;
+      src: url('https://cdn.jsdelivr.net/gh/fonts-archive/GangwonEduModu/GangwonEduModu-Light.woff2') format('woff2');
+    }
+    /* 글씨체 로드: GangwonEduModu Bold (B) */
+    @font-face {
+      font-family: 'GangwonEduModuB';
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+      src: url('https://cdn.jsdelivr.net/gh/fonts-archive/GangwonEduModu/GangwonEduModu-Bold.woff2') format('woff2');
+    }
+    /* 글씨체 로드: 학교안심 받아쓰기체 */
     @font-face {
       font-family: 'HakgyoansimBadasseugi';
-      src: url('/fonts/HakgyoansimBadasseugi.ttf') format('truetype');
+      src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimBadasseugiTTF-L.woff2') format('woff2');
+      font-weight: normal;
+      font-style: normal;
     }
 
+    /* 페이지 설정: A4 사이즈 세로, 여백 1cm */
     @page { size: A4 portrait; margin: 1cm; }
     @media print {
+      /* 인쇄 시 컨트롤 영역 숨기기 */
       #controls { display: none; }
-      body { -webkit-print-color-adjust: exact; }
+      /* 인쇄 시 컬러 보정 및 상단 여백 추가 */
+      body { -webkit-print-color-adjust: exact; margin-top: 20mm; }
+      /* 컨테이너는 항상 보이도록, 폭을 가득 채우기 */
+      #container { display: block !important; width: 100% !important; max-width: none !important; visibility: visible !important; }
+      /* 블록 내부에서 페이지 분할 방지 */
+      .block { page-break-inside: avoid !important; break-inside: avoid !important; -webkit-page-break-inside: avoid; }
     }
-    body {
-      margin: 0; padding: 20px;
-      font-family: 'Nanum Gothic', sans-serif;
-    }
-    #controls {
-      margin-bottom: 16px;
-      background: #f9f9f9;
-      padding: 10px;
-      border: 1px solid #ccc;
-    }
-    #controls label {
-      margin-right: 12px;
-      font-size: 16px;
-      display: inline-block;
-      margin-bottom: 6px;
-    }
-    #controls input,
-    #controls select,
-    #controls button {
-      padding: 4px;
-      font-size: 16px;
-    }
-    #controls button {
-      margin-left: 8px;
-    }
-    .block {
-      display: grid;
-      gap: 0;
-      margin-bottom: 12px;
-    }
-    .cell {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 40px;
-      height: 40px;
-      border: 1px solid #000;
-      font-size: 24px;
-      overflow: hidden;
-      position: relative;
-      box-sizing: border-box;
-    }
-    .cell::before {
-      content: ""; position: absolute;
-      top: 50%; left: 0; width: 100%; height: 0;
-      border-top: 1px dashed #000;
-      transform: translateY(-0.5px);
-    }
-    .cell::after {
-      content: ""; position: absolute;
-      top: 0; left: 50%; width: 0; height: 100%;
-      border-left: 1px dashed #000;
-      transform: translateX(-0.5px);
-    }
-    .guide {
-      color: #000;
-    }
-    .ghost {
-      color: #ccc;
-    }
+
+    body { margin: 0; padding: 20px; font-family: 'Nanum Gothic', sans-serif; }
+    #controls { margin-bottom: 16px; background: #f9f9f9; padding: 10px; border: 1px solid #ccc; }
+    #controls label { margin-right: 12px; font-size: 16px; display: inline-block; margin-bottom: 6px; }
+    #controls input, #controls select, #controls button { padding: 4px; font-size: 16px; }
+    #controls button { margin-left: 8px; }
+    .block { display: grid; gap: 0; margin-bottom: 12px; }
+    .cell { display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; border: 1px solid #000; font-size: 24px; overflow: hidden; position: relative; box-sizing: border-box; }
+    .cell::before { content: ""; position: absolute; top: 50%; left: 0; width: 100%; height: 0; border-top: 1px dashed rgba(0,0,0,0.3); transform: translateY(-0.5px); }
+    .cell::after { content: ""; position: absolute; top: 0; left: 50%; width: 0; height: 100%; border-left: 1px dashed rgba(0,0,0,0.3); transform: translateX(-0.5px); }
+    .guide { color: #000; }
+    .ghost { color: #ccc; }
+    #studentNameDisplay { display: flex; justify-content: flex-end; font-size: 20px; margin-bottom: 8px; padding-right: 20px; }
+    #studentNameDisplay span { border-bottom: 1px solid #000; padding-bottom: 2px; }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
   <div id="controls">
-    <div style="margin-bottom:8px;">
-      <label>연습할 글자:
-        <input id="inputText" type="text" placeholder="직접 입력할 글자..." style="width:300px;" />
-      </label>
+    <div style="margin-bottom:1px;">
+      <label>연습할 글자: <input id="inputText" type="text" placeholder="직접 입력할 글자..." style="width:300px;"></label>
+      <label style="margin-left:24px;"><button id="randomShortBtn" type="button">짧은 글 랜덤</button></label>
+      <label style="margin-left:24px;">긴 글 선택: <select id="exampleSelect"><option value="">-- 긴 글 선택 --</option></select></label>
+      <label style="margin-left:24px;">이름: <input id="studentName" type="text" placeholder="이름 입력..." style="width:120px;"></label>
+      <button id="generate">만들기</button>
       <button id="reset">초기화</button>
-      <label style="margin-left:24px;">예문 선택:
-        <select id="exampleSelect"><option value="">-- 예문 선택 --</option></select>
-      </label>
     </div>
-    <div>
-      <label>폰트:
-        <select id="fontSelect">
-          <option value="HakgyoansimBadasseugi">학교안심 받아쓰기체</option>
-          <option value="Nanum Gothic">나눔고딕</option>
-          <option value="Nanum Myeongjo">나눔명조</option>
-          <option value="Nanum Pen Script">나눔펜 스크립트</option>
-          <option value="Noto Sans KR">Noto Sans KR</option>
-          <option value="Noto Serif KR">Noto Serif KR</option>
-          <option value="Roboto">Roboto</option>
-        </select>
-      </label>
-      <label style="margin-left:24px;">학년:
-        <select id="gradeSelect">
-          <option value="1">1학년</option>
-          <option value="2">2학년</option>
-          <option value="3">3학년</option>
-          <option value="4">4학년</option>
-          <option value="5">5학년</option>
-          <option value="6">6학년</option>
-        </select>
-      </label>
-      <label style="margin-left:24px;">크기(pt):
-        <input id="sizeInput" type="number" value="40" min="12" max="72" />
-      </label>
-      <label style="margin-left:24px;">연습줄 수:
-        <select id="blankCount">
-          <option value="0">0줄</option>
-          <option value="1">1줄</option>
-          <option value="2" selected>2줄</option>
-          <option value="3">3줄</option>
-          <option value="4">4줄</option>
-        </select>
-      </label>
-      <label style="margin-left:24px;">
-        <input type="checkbox" id="showGhost"> 따라쓰기 추가
-      </label>
-      <button id="generate">생성</button>
-      <button id="print">인쇄</button>
-    </div>
+    <label>글씨체: <select id="fontSelect">
+      <option value="GangwonEduModuL" selected>강원교육모두체 L</option>
+      <option value="GangwonEduModuB">강원교육모두체 B</option>
+      <option value="HakgyoansimBadasseugi">학교안심 받아쓰기체</option>
+      <option value="Nanum Gothic">나눔고딕</option>
+      <option value="Nanum Myeongjo">나눔명조</option>
+      <option value="Nanum Pen Script">나눔펜 스크립트</option>
+      <option value="Noto Sans KR">Noto Sans KR</option>
+      <option value="Noto Serif KR">Noto Serif KR</option>
+      <option value="Roboto">Roboto</option>
+    </select></label>
+    <label style="margin-left:24px;">학년: <select id="gradeSelect">
+      <option value="1">1학년</option>
+      <option value="2">2학년</option>
+      <option value="3">3학년</option>
+      <option value="4">4학년</option>
+      <option value="5">5학년</option>
+      <option value="6">6학년</option>
+    </select></label>
+    <label style="margin-left:24px;">크기(pt): <input id="sizeInput" type="number" value="40" min="12" max="72"></label>
+    <label style="margin-left:24px;">연습줄 수: <select id="blankCount">
+      <option value="0">0줄</option>
+      <option value="1">1줄</option>
+      <option value="2" selected>2줄</option>
+      <option value="3">3줄</option>
+      <option value="4">4줄</option>
+    </select></label>
+    <label style="margin-left:24px;"><input type="checkbox" id="showGhost"> 따라쓰기 추가</label>
+    <label style="margin-left:24px;"><input type="radio" name="printOrientation" id="portraitMode" value="portrait" checked> 세로</label>
+    <label style="margin-left:16px;"><input type="radio" name="printOrientation" id="landscapeMode" value="landscape"> 가로</label>
+    <button id="print">인쇄</button>
+    <button id="savePdf">PDF 저장</button><label style="margin-left:80px;">
+    <button id="openManual" type="button">설명서</button>
   </div>
-  <div id="container"></div>
+  <div id="container"><div id="studentNameDisplay"></div></div>
+<script>
 
-  <script>
-    const input = document.getElementById('inputText');
-    const fontSel = document.getElementById('fontSelect');
-    const gradeSel = document.getElementById('gradeSelect');
-    const sizeIn = document.getElementById('sizeInput');
-    const blankSel = document.getElementById('blankCount');
-    const ghostChk = document.getElementById('showGhost');
-    const exampleSelect = document.getElementById('exampleSelect');
-    const generateBtn = document.getElementById('generate');
-    const printBtn = document.getElementById('print');
-    const resetBtn = document.getElementById('reset');
-    const cont = document.getElementById('container');
+  document.addEventListener('DOMContentLoaded', () => {
+    const mappings = [
+      { id: 'gradeSelect', type: 'value' },
+      { id: 'fontSelect',  type: 'value' },
+      { id: 'sizeInput',   type: 'value' },
+      { id: 'blankCount',  type: 'value' },
+      { id: 'showGhost',   type: 'checked' },
+      { id: 'portraitMode',type: 'checked', storageKey: 'printOrientation' },
+      { id: 'landscapeMode', type: 'checked', storageKey: 'printOrientation' }
+    ];
 
-    let examples = {};
-    fetch('/examples.json')
-      .then(res => res.json())
-      .then(data => {
-        examples = data;
-        Object.keys(data).forEach(title => {
-          const opt = document.createElement('option');
-          opt.value = title;
-          opt.textContent = title;
-          exampleSelect.appendChild(opt);
-        });
-      });
-
-    input.addEventListener('keypress', e => {
-      if (e.key === 'Enter') { e.preventDefault(); generateBtn.click(); }
-    });
-    const gradeSize = {1:40,2:38,3:36,4:34,5:32,6:30};
-    gradeSel.addEventListener('change', () => {
-      const g = parseInt(gradeSel.value,10);
-      if (gradeSize[g]) sizeIn.value = gradeSize[g];
+    mappings.forEach(({id, type, storageKey}) => {
+      const el = document.getElementById(id);
+      const key = storageKey || id;
+      const saved = localStorage.getItem(key);
+      if (saved != null) {
+        if (type === 'checked') {
+          // 라디오/체크박스
+          el.checked = (saved === el.value) || (saved === 'true' && el.type === 'checkbox');
+        } else {
+          el.value = saved;
+        }
+      }
     });
 
-    generateBtn.addEventListener('click', () => {
-      const t = input.value || examples[exampleSelect.value] || '';
-      if (!t) return;
-      render(t);
+    // orientation 스타일 즉시 반영
+    if (document.getElementById('landscapeMode').checked) {
+      document.querySelector('input[name=printOrientation][value=landscape]').click();
+    }
+  });
+
+  // 2) 사용자가 설정을 바꿀 때마다 저장하기
+  function bindSave(id, type, storageKey) {
+    const el = document.getElementById(id);
+    const key = storageKey || id;
+    const ev = (type === 'value') ? 'input' : 'change';
+    el.addEventListener(ev, () => {
+      const val = (type === 'checked') ? el.checked ? el.value : null : el.value;
+      if (val != null) localStorage.setItem(key, val);
+      else localStorage.removeItem(key);
     });
-    resetBtn.addEventListener('click', () => { input.value=''; exampleSelect.value=''; cont.innerHTML=''; });
-    printBtn.addEventListener('click', () => window.print());
-
-function render(text) {
-  const font       = fontSel.value;
-  const size       = parseInt(sizeIn.value, 10);
-  const showGhost  = ghostChk.checked;
-  const baseBlank  = parseInt(blankSel.value, 10);
-
-  const cellSize  = Math.ceil(size * 1.6);
-  const pageWidth = 800;
-  const colCount  = Math.floor(pageWidth / cellSize);
-
-  const totalLetters = [' ', ...text.split('')];
-  const totalCells   = totalLetters.length;
-  const rowCount     = Math.ceil(totalCells / colCount);
-
-  const lines = [];
-  for (let i = 0; i < totalCells; i += colCount) {
-    lines.push(totalLetters.slice(i, i + colCount));
   }
 
-  cont.innerHTML = '';
+  bindSave('gradeSelect', 'value');
+  bindSave('fontSelect',  'value');
+  bindSave('sizeInput',   'value');
+  bindSave('blankCount',  'value');
+  bindSave('showGhost',   'checked');
+  // 라디오 버튼 두 개 중 하나만 key 'printOrientation' 로 저장
+  bindSave('portraitMode', 'checked', 'printOrientation');
+  bindSave('landscapeMode','checked', 'printOrientation');
 
-  lines.forEach(chunk => {
-    const block = document.createElement('div');
-    block.className = 'block';
+  // DOM 요소 참조
+  const input = document.getElementById('inputText');
+  const fontSel = document.getElementById('fontSelect');
+  const gradeSel = document.getElementById('gradeSelect');
+  const sizeIn = document.getElementById('sizeInput');
+  const blankSel = document.getElementById('blankCount');
+  const ghostChk = document.getElementById('showGhost');
+  const exampleSelect = document.getElementById('exampleSelect');
+  const generateBtn = document.getElementById('generate');
+  const resetBtn = document.getElementById('reset');
+  const printBtn = document.getElementById('print');
+  const savePdfBtn = document.getElementById('savePdf');
+  const portraitRadio = document.getElementById('portraitMode');
+  const landscapeRadio = document.getElementById('landscapeMode');
+  const cont = document.getElementById('container');
+  const nameDisplay = document.getElementById('studentNameDisplay');
+  let examples = {};
+  let currentOrientation = 'portrait';
+  let currentText = '';
+  let shortSentences = [];
 
-    const actualBlank = showGhost ? baseBlank - 1 : baseBlank;
-    const totalRows = 1 + (showGhost ? 1 : 0) + actualBlank;
-
-    block.style.gridTemplateColumns = `repeat(${chunk.length}, ${cellSize}px)`;
-    block.style.gridTemplateRows    = `repeat(${totalRows}, ${cellSize}px)`;
-
-    // ① 가이드칸
-    chunk.forEach(ch => {
-      const cell = document.createElement('div');
-      cell.className = 'cell guide';
-      cell.style.width = cell.style.height = `${cellSize}px`;
-      cell.style.lineHeight = `${cellSize}px`;
-      cell.textContent = ch;
-      if (ch.trim()) {
-        cell.style.fontFamily = `'${font}', sans-serif`;
-        cell.style.fontSize   = `${size}px`;
-
-     	 if (/[.,]/.test(ch)) {
-      	  cell.style.justifyContent = 'flex-start';
-     	   cell.style.paddingLeft = '6px';
-	}
-      }
-      block.appendChild(cell);
+  // 예문 로드
+  fetch('/examples.json').then(res => res.json()).then(data => {
+    examples = data;
+    Object.keys(data).forEach(title => {
+      const opt = document.createElement('option');
+      opt.value = title;
+      opt.textContent = title;
+      exampleSelect.appendChild(opt);
     });
+  });
+  // 짧은 문장 로드
+  fetch('/short_sentences.txt')
+    .then(res => res.text())
+    .then(text => { shortSentences = text.split(/\r?\n/).map(line => line.trim()).filter(line => line); })
+    .catch(err => console.error('short_sentences.txt 로드 실패', err));
 
-    // ② 따라쓰기칸 (있을 때만)
-    if (showGhost) {
-      chunk.forEach(ch => {
-        const cell = document.createElement('div');
-        cell.className = 'cell ghost';
-        cell.style.width = cell.style.height = `${cellSize}px`;
-        cell.style.lineHeight = `${cellSize}px`;
-        cell.textContent = ch;
-        if (ch.trim()) {
-          cell.style.fontFamily = `'${font}', sans-serif`;
-          cell.style.fontSize   = `${size}px`;
+  // Enter 키 이벤트
+  input.addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); generateBtn.click(); } });
+  document.getElementById('studentName').addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); if (currentText) render(currentText); } });
 
-   	   if (/[.,]/.test(ch)) {
-  	     cell.style.justifyContent = 'flex-start';
-   	     cell.style.paddingLeft = '6px';
-   	   }
+  // 학년별 기본 크기
+  const gradeSize = {1:40,2:38,3:36,4:34,5:32,6:30};
+  gradeSel.addEventListener('change', () => { const g = parseInt(gradeSel.value,10); if (gradeSize[g]) sizeIn.value = gradeSize[g]; if (currentText) render(currentText); });
+  fontSel.addEventListener('change', () => { if (currentText) render(currentText); });
+  sizeIn.addEventListener('input', () => { if (currentText) render(currentText); });
+  blankSel.addEventListener('change', () => { if (currentText) render(currentText); });
+  ghostChk.addEventListener('change', () => { if (currentText) render(currentText); });
+  portraitRadio.addEventListener('change', () => { updatePrintOrientation(); if (currentText) render(currentText); });
+  landscapeRadio.addEventListener('change', () => { updatePrintOrientation(); if (currentText) render(currentText); });
+
+  // 생성 및 초기화
+  generateBtn.addEventListener('click', () => {
+    const t = input.value || examples[exampleSelect.value] || '';
+    if (!t) { alert('글자를 입력하거나 예문을 선택해주세요!'); return; }
+    currentText = t; render(t);
+  });
+  resetBtn.addEventListener('click', () => { input.value = ''; exampleSelect.value = ''; cont.innerHTML = '<div id="studentNameDisplay"></div>'; currentText = ''; });
+
+  // 인쇄 및 PDF 저장
+  printBtn.addEventListener('click', () => { if (!currentText) { alert('먼저 글자를 생성해주세요!'); return; } render(currentText); setTimeout(() => window.print(), 100); });
+  savePdfBtn.addEventListener('click', () => {
+    const element = document.getElementById('container');
+    const studentName = document.getElementById('studentName').value.trim() || '연습지';
+    const today = new Date();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const date = String(today.getDate()).padStart(2, '0');
+    const dateString = `${month}${date}`;
+    const fileName = `${dateString}_${studentName}.pdf`;
+    const opt = { margin: [10,10,10,10], filename: fileName, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'mm',format:'a4',orientation:currentOrientation},pagebreak:{avoid:['.block']} };
+    html2pdf().set(opt).from(element).save();
+  });
+
+  // 랜덤 문장 추가
+  document.getElementById('randomShortBtn').addEventListener('click', () => {
+    if (!shortSentences.length) { alert('아직 문장 목록이 로드되지 않았습니다.'); return; }
+    const rand = shortSentences[Math.floor(Math.random()*shortSentences.length)];
+    currentText = currentText ? currentText + rand : rand;
+    render(currentText);
+  });
+
+  // 렌더 함수: 그리드 생성
+  function render(text) {
+    const font = fontSel.value;
+    const size = parseInt(sizeIn.value,10);
+    const showGhost = ghostChk.checked;
+    const baseBlank = parseInt(blankSel.value,10);
+    const cellSize = Math.ceil(size * 1.4);
+    const pageWidth = currentOrientation==='landscape'?950:700;
+    cont.style.width = '100%';
+      let colCount = Math.floor(pageWidth / cellSize);
+  // 가로 모드면 한 칸 추가
+ 	 if (currentOrientation === 'landscape') {
+  	  colCount += 1;
+ 	 }
+    const letters = text.split('');
+    const lines=[];
+    for (let i=0;i<letters.length;i+=colCount) {
+      let chunk = letters.slice(i,i+colCount);
+      while(chunk.length<colCount) chunk.push('');
+      lines.push(chunk);
+    }
+    const studentName = document.getElementById('studentName').value.trim();
+    const today=new Date();
+    const month=String(today.getMonth()+1).padStart(2,'0');
+    const date=String(today.getDate()).padStart(2,'0');
+    const dateString=`${month}${date}`;
+    nameDisplay.innerHTML = studentName?`<span>${dateString}_${studentName}</span>`:'';
+    cont.innerHTML=''; cont.appendChild(nameDisplay);
+    lines.forEach(chunk=>{
+      const block=document.createElement('div');
+        block.classList.add('block');     
+      const actualBlank=showGhost?Math.max(baseBlank-1,0):baseBlank;
+      const totalRows=1+(showGhost?1:0)+actualBlank;
+      block.style.display='grid';
+      block.style.gridTemplateColumns=`repeat(${colCount},${cellSize}px)`;
+      block.style.gridTemplateRows=`repeat(${totalRows},${cellSize}px)`;
+      // 가이드 셀
+      chunk.forEach(ch=>{
+        const cell=document.createElement('div');
+        cell.className='cell guide';
+        cell.style.width=cell.style.height=`${cellSize}px`;
+        cell.style.lineHeight=`${cellSize}px`;
+        cell.textContent=ch;
+        if(ch.trim()){
+          cell.style.fontFamily=`${font}, sans-serif`;
+          cell.style.fontSize=`${size}px`;
+          if(/[\.,]/.test(ch)){cell.style.justifyContent='flex-start';cell.style.paddingLeft='6px';}
         }
         block.appendChild(cell);
       });
-    }
-
-    // ③ 빈 연습칸
-    for (let r = 0; r < actualBlank; r++) {
-      chunk.forEach(() => {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        cell.style.width = cell.style.height = `${cellSize}px`;
-        cell.style.lineHeight = `${cellSize}px`;
+      // 따라쓰기 셀
+      if(showGhost) chunk.forEach(ch=>{
+        const cell=document.createElement('div');
+        cell.className='cell ghost';
+        cell.style.width=cell.style.height=`${cellSize}px`;
+        cell.style.lineHeight=`${cellSize}px`;
+        cell.textContent=ch;
+        if(ch.trim()){
+          cell.style.fontFamily=`${font}, sans-serif`;
+          cell.style.fontSize=`${size}px`;
+          if(/[\.,]/.test(ch)){cell.style.justifyContent='flex-start';cell.style.paddingLeft='6px';}
+        }
         block.appendChild(cell);
       });
-    }
+      // 빈 블랭크 줄
+      for(let r=0;r<actualBlank;r++) chunk.forEach(()=>{
+        const cell=document.createElement('div');
+        cell.className='cell';
+        cell.style.width=cell.style.height=`${cellSize}px`;
+        cell.style.lineHeight=`${cellSize}px`;
+        block.appendChild(cell);
+      });
+      cont.appendChild(block);
+    });
+  }
+  // 인쇄 방향 스타일 업데이트
+  const printStyle=document.createElement('style'); document.head.appendChild(printStyle);
+  function updatePrintOrientation(){
+    const orientation=portraitRadio.checked?'portrait':'landscape';
+    currentOrientation=orientation;
+    printStyle.innerHTML=`@page { size: A4 ${orientation}; margin: 1cm; }`;
+  }
+  updatePrintOrientation();
+  window.addEventListener('beforeprint',()=>{ if(currentText) render(currentText); });
 
-    cont.appendChild(block);
-  });
-}
-  </script>
+const manualBtn = document.getElementById('openManual');
+manualBtn.addEventListener('click', () => {
+  // manual.html 또는 manual.pdf 파일을 public/ 폴더에 두세요.
+  window.open(
+    'manual.html',      // 또는 'manual.pdf'
+    '_blank',           // 새 탭/창
+    'width=900,height=600,scrollbars=yes'
+  );
+});
+</script>
 </body>
 </html>
