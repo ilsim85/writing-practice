@@ -266,50 +266,99 @@
     const dateString=`${month}${date}`;
     nameDisplay.innerHTML = studentName?`<span>${dateString}_${studentName}</span>`:'';
     cont.innerHTML=''; cont.appendChild(nameDisplay);
-    lines.forEach(chunk=>{
-      const block=document.createElement('div');
-        block.classList.add('block');     
-      const actualBlank=showGhost?Math.max(baseBlank-1,0):baseBlank;
-      const totalRows=1+(showGhost?1:0)+actualBlank;
-      block.style.display='grid';
-      block.style.gridTemplateColumns=`repeat(${colCount},${cellSize}px)`;
-      block.style.gridTemplateRows=`repeat(${totalRows},${cellSize}px)`;
+    // 🔄 전체 문자열을 colCount씩 나눈 각 줄을 렌더링
+    lines.forEach((chunk, lineNo) => {
+      const block = document.createElement('div');
+      block.classList.add('block');
+
+      const actualBlank = showGhost ? Math.max(baseBlank - 1, 0) : baseBlank;
+      const totalRows = 1 + (showGhost ? 1 : 0) + actualBlank;
+
+      block.style.display = 'grid';
+      block.style.gridTemplateColumns = `repeat(${colCount}, ${cellSize}px)`;
+      block.style.gridTemplateRows = `repeat(${totalRows}, ${cellSize}px)`;
+
+      // 이 줄(chunk)의 시작 인덱스(문장 전체 기준)
+      const startIdx = lineNo * colCount;
+
+      const isQuote = c => ['“', '”', '"', '‘', '’', "'"].includes(c);
+      const quoteIndices = letters
+            .map((c, idx) => (isQuote(c) ? idx : -1))
+            .filter(idx => idx >= 0);
+
+
+      // 공통 스타일러: 마침표/따옴표 정렬 규칙
+      function styleChar(cell, ch, globalIdx) {
+        cell.style.fontFamily = `${font}, sans-serif`;
+        cell.style.fontSize = `${size}px`;
+
+        if (/[.,]/.test(ch)) {
+          // 마침표·쉼표는 항상 왼쪽 정렬
+          cell.style.justifyContent = 'flex-start';
+          cell.style.paddingLeft = '6px';
+          return;
+        }
+
+        if (isQuote(ch)) {
+              // 현재 따옴표가 전체 따옴표 중 몇 번째인지 계산
+              const order = quoteIndices.indexOf(globalIdx);
+
+              if (order % 2 === 0) {
+                // 첫 번째(0), 세 번째(2), ... 따옴표 → 오른쪽 정렬
+                cell.style.justifyContent = 'flex-end';
+                cell.style.paddingRight = '6px';
+            } else {
+                // 두 번째(1), 네 번째(3), ... 따옴표 → 왼쪽 정렬
+                cell.style.justifyContent = 'flex-start';
+                cell.style.paddingLeft = '6px';
+            }
+          }
+      }
+
       // 가이드 셀
-      chunk.forEach(ch=>{
-        const cell=document.createElement('div');
-        cell.className='cell guide';
-        cell.style.width=cell.style.height=`${cellSize}px`;
-        cell.style.lineHeight=`${cellSize}px`;
-        cell.textContent=ch;
-        if(ch.trim()){
-          cell.style.fontFamily=`${font}, sans-serif`;
-          cell.style.fontSize=`${size}px`;
-          if(/[\.,]/.test(ch)){cell.style.justifyContent='flex-start';cell.style.paddingLeft='6px';}
+      chunk.forEach((ch, idx) => {
+        const cell = document.createElement('div');
+        cell.className = 'cell guide';
+        cell.style.width = cell.style.height = `${cellSize}px`;
+        cell.style.lineHeight = `${cellSize}px`;
+        cell.textContent = ch;
+
+        if (ch.trim()) {
+          const globalIdx = startIdx + idx; // 전체 문자열 기준 위치
+          styleChar(cell, ch, globalIdx);
         }
         block.appendChild(cell);
       });
-      // 따라쓰기 셀
-      if(showGhost) chunk.forEach(ch=>{
-        const cell=document.createElement('div');
-        cell.className='cell ghost';
-        cell.style.width=cell.style.height=`${cellSize}px`;
-        cell.style.lineHeight=`${cellSize}px`;
-        cell.textContent=ch;
-        if(ch.trim()){
-          cell.style.fontFamily=`${font}, sans-serif`;
-          cell.style.fontSize=`${size}px`;
-          if(/[\.,]/.test(ch)){cell.style.justifyContent='flex-start';cell.style.paddingLeft='6px';}
-        }
-        block.appendChild(cell);
-      });
+
+      // 따라쓰기(ghost) 셀
+      if (showGhost) {
+        chunk.forEach((ch, idx) => {
+          const cell = document.createElement('div');
+          cell.className = 'cell ghost';
+          cell.style.width = cell.style.height = `${cellSize}px`;
+          cell.style.lineHeight = `${cellSize}px`;
+          cell.textContent = ch;
+
+          if (ch.trim()) {
+            const globalIdx = startIdx + idx;
+            styleChar(cell, ch, globalIdx);
+          }
+          block.appendChild(cell);
+        });
+      }
+
       // 빈 블랭크 줄
-      for(let r=0;r<actualBlank;r++) chunk.forEach(()=>{
-        const cell=document.createElement('div');
-        cell.className='cell';
-        cell.style.width=cell.style.height=`${cellSize}px`;
-        cell.style.lineHeight=`${cellSize}px`;
-        block.appendChild(cell);
-      });
+      for (let r = 0; r < actualBlank; r++) {
+        chunk.forEach(() => {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.style.width = cell.style.height = `${cellSize}px`;
+          cell.style.lineHeight = `${cellSize}px`;
+          block.appendChild(cell);
+        });
+      }
+
+      // 한 줄 완료
       cont.appendChild(block);
     });
   }
